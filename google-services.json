@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "849880378355",
+    "firebase_url": "https://travelersapp-1.firebaseio.com",
+    "project_id": "travelersapp-1",
+    "storage_bucket": "travelersapp-1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:849880378355:android:5768d998c7c86627f94086",
+        "android_client_info": {
+          "package_name": "com.android.library"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "849880378355-cttjfb9f90uj9pfgnva88go9kr7g24ti.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBne8p73kZlBfn-nIEjvwcuggIkn0cBta4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "849880378355-cttjfb9f90uj9pfgnva88go9kr7g24ti.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
