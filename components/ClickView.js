@@ -1,27 +1,37 @@
 import React, { Component } from 'react'
 import { StyleSheet, View, Text, Button } from 'react-native'
 
-export default class CustomCalloutView extends Component {
-
-    onPressDetails() {
-        return (
-                <View>
-                    <Text>text here</Text>
-                </View>
-        )
-    }
-
+export default class CustomOverlayView extends Component {
 
     render() {
         return (
             <View>
-                <Text style={styles.ClickViewText}>
-                    {this.props.title}
+                <Text style={styles.clickViewText}>
+                    {this.props.address[4]}
+                </Text>
+                <Text style={styles.clickViewText}>
+                    Business Hours: {this.props.address[5]}
+                </Text>
+                <Text style={styles.clickViewText}>
+                    {this.props.address[0]}
+                </Text>
+                <Text style={styles.clickViewText}>
+                    {this.props.address[1]}
+                </Text>
+                <Text style={styles.clickViewText}>
+                    {this.props.address[2]}
+                </Text>
+                <Text style={styles.clickViewText}>
+                    {this.props.address[3]}
+                </Text>
+                <Text style={styles.clickViewText}>
+                    {this.props.distance} away
                 </Text>
                 <Button 
-                    onPress={this.onPressDetails}
-                    title='Click for details'
-                    color= '#aacf61'
+                    title='Exit'
+                />
+                <Button 
+                    title='Navigate'
                 />
             </View>
         )
@@ -29,7 +39,13 @@ export default class CustomCalloutView extends Component {
 }
 
 const styles = StyleSheet.create({
-    ClickViewText: {
+    clickViewText: {
         color: 'red'
-    }
+    },
+    centeredView: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: 22
+      }
 })

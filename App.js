@@ -1,12 +1,13 @@
 import React, { Component } from 'react'
-import MapView, { Callout, Marker } from 'react-native-maps'
+import MapView, { Polyline, Callout, Marker } from 'react-native-maps'
 import { decode } from '@mapbox/polyline'
 import { getRegion } from './src/helpers/map'
 import * as Location from 'expo-location'
 import * as Permissions from 'expo-permissions'
-import { TextInput, TouchableOpacity, ToastAndroid, StatusBar, Button, StyleSheet, View, Text } from 'react-native';
+import { TextInput, TouchableOpacity, Button, StyleSheet, View, Text } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons'
-import CustomCalloutView from './components/ClickView'
+import CustomOverlayView from './components/ClickView'
+import { Overlay } from 'react-native-elements'
 
 export default class App extends Component {
   constructor() {
@@ -17,7 +18,10 @@ export default class App extends Component {
         desLatitude:null,
         desLongitude:null,
         coords: [],
-        data: []
+        data: [],
+        distance:'',
+        visible: false,
+        chargerInfo: []
     } 
   }
 
@@ -37,7 +41,7 @@ export default class App extends Component {
         })
     }
 
-    //ask premission to use my location 
+    //ask permission to use my location 
     getLocation = async () => {
         let { status } = await Permissions.askAsync(Permissions.LOCATION);
     
@@ -53,6 +57,21 @@ export default class App extends Component {
        }
     }
     
+    //when marker is pressed, the state of initial polycoords is updated
+    //current pressed marker's info is also updated
+    onPressMarker = (marker) => () => {
+      this.setState({
+        desLatitude: marker.AddressInfo.Latitude,
+        desLongitude: marker.AddressInfo.Longitude,
+        chargerInfo: [marker.AddressInfo.AddressLine1, 
+                      marker.AddressInfo.Town,
+                      marker.AddressInfo.StateOrProvince,
+                      marker.AddressInfo.Postcode,
+                      marker.AddressInfo.Title,
+                      marker.AddressInfo.ContactTelephone1]
+      }, this.routeCoords)
+    }
+
     //deconstruct state and when not null, pass Start and End parameters
     //to this.fetchRoute()
     routeCoords = () => {
@@ -73,7 +92,6 @@ export default class App extends Component {
 
     }
 
-
     //fetch coordinates of startingLoc and endingLoc from google maps API
     //decode the response and set the mapped points to setState
     async fetchRoute(startingLoc, endingLoc) {
@@ -81,6 +99,7 @@ export default class App extends Component {
         const resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${startingLoc}&destination=${endingLoc}&key=API-KEY-GOES-HERE`)
         const respJson = await resp.json()
         const points = decode(respJson.routes[0].overview_polyline.points)
+        const distance = respJson.routes[0].legs[0].distance.text
         const coords = points.map(point => {
           return {
             latitude: point[0],
@@ -88,25 +107,23 @@ export default class App extends Component {
           }
         })
         this.setState({
-            coords: coords
+            coords: coords,
+          distance: distance
         })
       } catch (error) {
         console.log('Error: ', error)
       }
     }
-  
-    //when marker is pressed, the state of initial polycoords is updated
-    onPressMarker = (marker) => () => {
-      this.setState({
-        desLatitude: marker.AddressInfo.Latitude,
-        desLongitude: marker.AddressInfo.Longitude
-     }, this.routeCoords)
-    }
 
     //maps out all the markers on the mapview by mapping through data
-    //CustomCalloutView is everything in the bubble above marker when pressed
-    //passing title and address to CustomCalloutView so we can use them
     mapMarkers() {
+      //when 'Click For Details' is pressed, the Overlay becomes visible
+      onPressDetails = () => {
+        this.setState({
+          visible: true
+        })
+      }
+
       return this.state.data.map((marker, index) => (
         <Marker
             key={index}
@@ -116,28 +133,30 @@ export default class App extends Component {
             onPress={this.onPressMarker(marker)}
         >
           <Callout>
-            <CustomCalloutView 
-              title={marker.AddressInfo.Title}
-              address={marker.AddressInfo.AddressLine1}
-            />
+            <View>
+              <Text>{marker.AddressInfo.Title}</Text>
+              <Text>Distance: {this.state.distance}</Text>
+              <Button 
+                  title='Click For Details'
+                  onPress={() => onPressDetails()}
+              />
+            </View>
           </Callout>
-        </Marker>))
-    }
+        </Marker>
+      ))}
 
-    //render the Polyline only when polycoords state is not null
-    renderPoly() {
-      if (this.state.desLatitude !== null) {
-        return (
-          <MapView.Polyline 
-                coordinates={ this.state.coords } 
-            />
-        )
-      }
-    }
 
+    onBackDropPress = () => {
+      this.setState({
+        visible: false
+      })
+    }
 
     render() {
+
         return (
+          //passing address and distance to CustomOverlayView so we can use them
+                <>
                 <MapView 
                     showsUserLocation
                     ref={(ref) => this.map = ref}
@@ -145,48 +164,28 @@ export default class App extends Component {
                     initialRegion={getRegion(41.3851, 2.1734, 160000)}
                 >
                   {this.mapMarkers()}
-                  {this.renderPoly()}
+                  <Polyline 
+                    coordinates={this.state.coords}
+                  />
                 </MapView>
+                    <View>
+                      <Overlay
+                          isVisible={this.state.visible}
+                          onBackdropPress={this.onBackDropPress}
+                      >
+                        <CustomOverlayView 
+                            address={this.state.chargerInfo}
+                            distance={this.state.distance}
+                        />
+                      </Overlay>
+                    </View>
+                </>
             )
         }
     }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
     map: {
         ...StyleSheet.absoluteFillObject
-    },
-    inputWrapper: {
-        width: '100%',
-        position: 'absolute',
-        padding: 10,
-        top: 44,
-        left: 0,
-        zIndex: 100
-      },
-      input: {
-        height: 46,
-        paddingVertical: 10,
-        paddingRight: 50,
-        paddingLeft: 10,
-        borderColor: 'gray',
-        borderWidth: 1,
-        borderRadius: 6,
-        borderColor: '#ccc',
-        backgroundColor: '#fff'
-      },
-      sendButton: {
-        position: 'absolute',
-        top: 17,
-        right: 20,
-        opacity: 0.4
-      },
-      sendButtonActive: {
-        opacity: 1
-      }
-    });
+    }
+});
