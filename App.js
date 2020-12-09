@@ -25,11 +25,17 @@ export default class App extends Component {
     } 
   }
 
-    //when the component mounts, we get out location 
-    //and the data is fetched from our API
+    //when the component mounts, we get user's location 
     componentDidMount() {
         this.getLocation()
-        fetch('https://api.openchargemap.io/v3/poi/?key=API-KEY-GOES-HERE&output=json&countrycode=SPAIN&maxresults=3000&compact=true&verbose=false')
+    }
+
+
+    //Charger data is fetched from our API after component mounts
+    //locations are limited to 20 miles from user's location
+    componentDidUpdate() {
+      if (this.state.myLatitude !== null) {
+        fetch(`https://api.openchargemap.io/v3/poi/?key=API-KEY-GOES-HERE&output=json&countrycode=SPAIN&latitude=${this.state.myLatitude}&longitude=${this.state.myLongitude}&distance=20&compact=true&verbose=false`)
         .then(response => response.json())
         .then((resp) => {
           this.setState({
@@ -39,6 +45,7 @@ export default class App extends Component {
         .catch((error) => {
           console.log('Error', error)
         })
+      }
     }
 
     //ask permission to use my location 
