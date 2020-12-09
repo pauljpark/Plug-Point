@@ -28,10 +28,10 @@ export default class CustomOverlayView extends Component {
                     {this.props.distance} away
                 </Text>
                 <Button 
-                    title='Exit'
+                    title='Navigate'
                 />
                 <Button 
-                    title='Navigate'
+                    title='Exit'
                 />
             </View>
         )

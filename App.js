@@ -4,8 +4,8 @@ import { decode } from '@mapbox/polyline'
 import { getRegion } from './src/helpers/map'
 import * as Location from 'expo-location'
 import * as Permissions from 'expo-permissions'
-import { TextInput, TouchableOpacity, Button, StyleSheet, View, Text } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons'
+import { Button, StyleSheet, View, Text } from 'react-native';
+import { Entypo } from '@expo/vector-icons'
 import CustomOverlayView from './components/ClickView'
 import { Overlay } from 'react-native-elements'
 
@@ -35,7 +35,7 @@ export default class App extends Component {
     //locations are limited to 20 miles from user's location
     componentDidUpdate() {
       if (this.state.myLatitude !== null) {
-        fetch(`https://api.openchargemap.io/v3/poi/?key=API-KEY-GOES-HERE&output=json&countrycode=SPAIN&latitude=${this.state.myLatitude}&longitude=${this.state.myLongitude}&distance=20&compact=true&verbose=false`)
+        fetch(`https://api.openchargemap.io/v3/poi/?key=API-KEY-GOES-HERE&output=json&countrycode=US&latitude=${this.state.myLatitude}&longitude=${this.state.myLongitude}&distance=10&compact=true&verbose=false`)
         .then(response => response.json())
         .then((resp) => {
           this.setState({
@@ -152,11 +152,16 @@ export default class App extends Component {
         </Marker>
       ))}
 
-
+    //simply exits the Overlay                    
     onBackDropPress = () => {
       this.setState({
         visible: false
       })
+    }
+
+    //will animate back to user's location when pressed
+    animateBack = () => {
+      this.map.animateToRegion(getRegion(this.state.myLatitude, this.state.myLongitude, 16000));
     }
 
     render() {
@@ -185,6 +190,15 @@ export default class App extends Component {
                             distance={this.state.distance}
                         />
                       </Overlay>
+
+                    </View>
+                    <View style={styles.button}>
+                      <Entypo 
+                        name="direction" 
+                        size={40} 
+                        color="black"
+                        onPress={this.animateBack}
+                      />
                     </View>
                 </>
             )
@@ -194,5 +208,11 @@ export default class App extends Component {
 const styles = StyleSheet.create({
     map: {
         ...StyleSheet.absoluteFillObject
+    },
+    button: {
+      position: 'absolute',
+      top: '7%',
+      right: '7%',
+      alignSelf: 'flex-end'
     }
 });
