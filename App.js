@@ -25,27 +25,9 @@ export default class App extends Component {
     } 
   }
 
-    //when the component mounts, we get user's location 
+    //when the component mounts, we get user's location and fetch API data
     componentDidMount() {
         this.getLocation()
-    }
-
-
-    //Charger data is fetched from our API after component mounts
-    //locations are limited to 20 miles from user's location
-    componentDidUpdate() {
-      if (this.state.myLatitude !== null) {
-        fetch(`https://api.openchargemap.io/v3/poi/?key=API-KEY-GOES-HERE&output=json&countrycode=US&latitude=${this.state.myLatitude}&longitude=${this.state.myLongitude}&distance=10&compact=true&verbose=false`)
-        .then(response => response.json())
-        .then((resp) => {
-          this.setState({
-            data: resp
-          })
-        })
-        .catch((error) => {
-          console.log('Error', error)
-        })
-      }
     }
 
     //ask permission to use my location 
@@ -61,7 +43,20 @@ export default class App extends Component {
           });
     
           this.map.animateToRegion(getRegion(location.coords.latitude, location.coords.longitude, 16000));
-       }
+       } else { alert('We need your permission!') }
+
+      //Charger data is fetched from API after location access is granted
+      //locations are limited to 10 miles from user's location
+       fetch(`https://api.openchargemap.io/v3/poi/?key=API-KEY-GOES-HERE&output=json&countrycode=SPAIN&latitude=${this.state.myLatitude}&longitude=${this.state.myLongitude}&distance=10&compact=true&verbose=false`)
+       .then(response => response.json())
+       .then((resp) => {
+         this.setState({
+           data: resp
+         })
+       })
+       .catch((error) => {
+         console.log('Error', error)
+       })
     }
     
     //when marker is pressed, the state of initial polycoords is updated
@@ -188,6 +183,9 @@ export default class App extends Component {
                         <CustomOverlayView 
                             address={this.state.chargerInfo}
                             distance={this.state.distance}
+                            desLat={this.state.desLatitude}
+                            desLong={this.state.desLongitude}
+                            overlayExit={this.onBackDropPress}
                         />
                       </Overlay>
 

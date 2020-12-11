@@ -1,7 +1,19 @@
 import React, { Component } from 'react'
-import { StyleSheet, View, Text, Button } from 'react-native'
+import { StyleSheet, View, Text, Button, Linking } from 'react-native'
 
-export default class CustomOverlayView extends Component {
+export default class CustomOverlayView extends Component { 
+
+    handlePress = () => {
+        Linking.canOpenURL("comgooglemaps")
+        .then((canOpen) => {
+            console.log(canOpen)
+            if (canOpen) { 
+                Linking.openURL(`comgooglemaps://?daddr=${this.props.desLat.toString()},${this.props.desLong.toString()}&directionsmode=driving`) 
+            } else { 
+                Linking.openURL(`http://maps.apple.com/?daddr=${this.props.desLat.toString()},${this.props.desLong.toString()}`) 
+            }
+        })
+    }
 
     render() {
         return (
@@ -29,9 +41,11 @@ export default class CustomOverlayView extends Component {
                 </Text>
                 <Button 
                     title='Navigate'
+                    onPress={this.handlePress}
                 />
                 <Button 
                     title='Exit'
+                    onPress={this.props.overlayExit}
                 />
             </View>
         )
