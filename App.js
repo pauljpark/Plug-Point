@@ -4,7 +4,7 @@ import { decode } from '@mapbox/polyline'
 import { getRegion } from './src/helpers/map'
 import * as Location from 'expo-location'
 import * as Permissions from 'expo-permissions'
-import { Button, StyleSheet, View, Text } from 'react-native';
+import { Button, StyleSheet, View, Text, ActivityIndicator } from 'react-native';
 import { Entypo } from '@expo/vector-icons'
 import CustomOverlayView from './components/ClickView'
 import { Overlay } from 'react-native-elements'
@@ -21,6 +21,7 @@ export default class App extends Component {
         data: [],
         distance:'',
         visible: false,
+        spinnerVisible: true,
         chargerInfo: []
     } 
   }
@@ -39,7 +40,8 @@ export default class App extends Component {
     
           this.setState({
               myLatitude:location.coords.latitude,
-              myLongitude:location.coords.longitude
+              myLongitude:location.coords.longitude,
+              spinnerVisible: false
           });
     
           this.map.animateToRegion(getRegion(location.coords.latitude, location.coords.longitude, 16000));
@@ -47,7 +49,7 @@ export default class App extends Component {
 
       //Charger data is fetched from API after location access is granted
       //locations are limited to 10 miles from user's location
-       fetch(`https://api.openchargemap.io/v3/poi/?key=API-KEY-GOES-HERE&output=json&countrycode=SPAIN&latitude=${this.state.myLatitude}&longitude=${this.state.myLongitude}&distance=10&compact=true&verbose=false`)
+       fetch(`https://api.openchargemap.io/v3/poi/?key=61a69b45-261f-4066-b848-583b442a5d3f&output=json&countrycode=US&latitude=${this.state.myLatitude}&longitude=${this.state.myLongitude}&distance=10&compact=true&verbose=false`)
        .then(response => response.json())
        .then((resp) => {
          this.setState({
@@ -98,7 +100,7 @@ export default class App extends Component {
     //decode the response and set the mapped points to setState
     async fetchRoute(startingLoc, endingLoc) {
       try {
-        const resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${startingLoc}&destination=${endingLoc}&key=API-KEY-GOES-HERE`)
+        const resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${startingLoc}&destination=${endingLoc}&key=AIzaSyBCEagotJfdsPPkKT0K5Vuti13JxYWILjk`)
         const respJson = await resp.json()
         const points = decode(respJson.routes[0].overview_polyline.points)
         const distance = respJson.routes[0].legs[0].distance.text
@@ -168,7 +170,7 @@ export default class App extends Component {
                     showsUserLocation
                     ref={(ref) => this.map = ref}
                     style={styles.map}
-                    initialRegion={getRegion(41.3851, 2.1734, 160000)}
+                    initialRegion={getRegion(39.9526, -75.1652, 160000)}
                 >
                   {this.mapMarkers()}
                   <Polyline 
@@ -188,7 +190,6 @@ export default class App extends Component {
                             overlayExit={this.onBackDropPress}
                         />
                       </Overlay>
-
                     </View>
                     <View style={styles.button}>
                       <Entypo 
@@ -196,6 +197,13 @@ export default class App extends Component {
                         size={40} 
                         color="black"
                         onPress={this.animateBack}
+                      />
+                    </View>
+                    <View style={styles.spinner}>
+                      <ActivityIndicator 
+                        size='large' 
+                        color='#000000' 
+                        animating={this.state.spinnerVisible}
                       />
                     </View>
                 </>
@@ -212,5 +220,11 @@ const styles = StyleSheet.create({
       top: '7%',
       right: '7%',
       alignSelf: 'flex-end'
+    },
+    spinner: {
+      position: 'absolute',
+      flex: 1,
+      alignSelf: 'center',
+      marginTop: '100%'
     }
 });

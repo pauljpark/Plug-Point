@@ -44,6 +44,10 @@ export default class CustomOverlayView extends Component {
                     onPress={this.handlePress}
                 />
                 <Button 
+                    title='Save'
+                    
+                />
+                <Button 
                     title='Exit'
                     onPress={this.props.overlayExit}
                 />
