@@ -50,7 +50,7 @@ export default class Map extends Component {
 
       //Charger data is fetched from API after location access is granted
       //locations are limited to 10 miles from user's location
-       fetch(`https://api.openchargemap.io/v3/poi/?key=61a69b45-261f-4066-b848-583b442a5d3f&output=json&countrycode=US&latitude=${this.state.myLatitude}&longitude=${this.state.myLongitude}&distance=10&compact=true&verbose=false`)
+       fetch(`https://api.openchargemap.io/v3/poi/?key=API-KEY-HERE&output=json&countrycode=US&latitude=${this.state.myLatitude}&longitude=${this.state.myLongitude}&distance=10&compact=true&verbose=false`)
        .then(response => response.json())
        .then((resp) => {
          this.setState({
@@ -101,7 +101,7 @@ export default class Map extends Component {
     //decode the response and set the mapped points to setState
     async fetchRoute(startingLoc, endingLoc) {
       try {
-        const resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${startingLoc}&destination=${endingLoc}&key=AIzaSyBCEagotJfdsPPkKT0K5Vuti13JxYWILjk`)
+        const resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${startingLoc}&destination=${endingLoc}&key=API-KEY-HERE`)
         const respJson = await resp.json()
         const points = decode(respJson.routes[0].overview_polyline.points)
         const distance = respJson.routes[0].legs[0].distance.text
