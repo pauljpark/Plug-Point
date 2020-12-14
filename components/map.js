@@ -8,7 +8,6 @@ import { Button, StyleSheet, View, Text, ActivityIndicator } from 'react-native'
 import { Entypo } from '@expo/vector-icons'
 import CustomOverlayView from './ClickView'
 import { Overlay } from 'react-native-elements'
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 
 export default class Map extends Component {
   constructor() {
@@ -163,7 +162,18 @@ export default class Map extends Component {
     }
 
     render() {
-      const Tab = createBottomTabNavigator()
+      if (this.state.spinnerVisible == true) {
+        return (
+            <View style={styles.spinner}>
+                  <Text style={styles.text}>Please wait...</Text>
+                  <ActivityIndicator 
+                        size='large' 
+                        color='#000000' 
+                        animating={this.state.spinnerVisible}
+                  />
+            </View>
+        )
+      } else {
         return (
           //passing address and distance to CustomOverlayView so we can use them
                 <>
@@ -200,15 +210,8 @@ export default class Map extends Component {
                         onPress={this.animateBack}
                       />
                     </View>
-                    <View style={styles.spinner}>
-                      <ActivityIndicator 
-                        size='large' 
-                        color='#000000' 
-                        animating={this.state.spinnerVisible}
-                      />
-                    </View>
                 </>
-            )
+            )}
         }
     }
 
@@ -231,5 +234,8 @@ const styles = StyleSheet.create({
       flex: 1,
       alignSelf: 'center',
       marginTop: '100%'
+    },
+    text: {
+      bottom: '5%'
     }
 });

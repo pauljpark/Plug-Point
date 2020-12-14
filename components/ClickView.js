@@ -1,8 +1,11 @@
 import React, { Component } from 'react'
-import { StyleSheet, View, Text, Button, Linking } from 'react-native'
+import { StyleSheet, View, Text, Button, Linking, Alert } from 'react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 export default class CustomOverlayView extends Component { 
 
+    //when user presses "Navigate", app will check for google maps first,
+    //if not installed, will open with apple maps
     handlePress = () => {
         Linking.canOpenURL("comgooglemaps")
         .then((canOpen) => {
@@ -13,6 +16,18 @@ export default class CustomOverlayView extends Component {
                 Linking.openURL(`http://maps.apple.com/?daddr=${this.props.desLat.toString()},${this.props.desLong.toString()}`) 
             }
         })
+    }
+
+    //saves the location to async storage
+    async saveLoc() {
+        try {
+            await AsyncStorage.setItem(this.props.address[4], 'testingtesting123')
+        } catch (error) {
+            console.log('Error:', error)
+        }
+
+        Alert.alert('Saved to Favorites!')
+
     }
 
     render() {
@@ -45,7 +60,7 @@ export default class CustomOverlayView extends Component {
                 />
                 <Button 
                     title='Save'
-                    
+                    onPress={() => this.saveLoc()}
                 />
                 <Button 
                     title='Exit'
