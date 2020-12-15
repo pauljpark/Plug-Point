@@ -6,7 +6,7 @@ import * as Location from 'expo-location'
 import * as Permissions from 'expo-permissions'
 import { Button, StyleSheet, View, Text, ActivityIndicator } from 'react-native';
 import { Entypo } from '@expo/vector-icons'
-import CustomOverlayView from './ClickView'
+import CustomOverlayView from './clickView'
 import { Overlay } from 'react-native-elements'
 
 export default class Map extends Component {

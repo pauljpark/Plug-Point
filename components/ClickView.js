@@ -21,7 +21,7 @@ export default class CustomOverlayView extends Component {
     //saves the location to async storage
     async saveLoc() {
         try {
-            await AsyncStorage.setItem(this.props.address[4], 'testingtesting123')
+            await AsyncStorage.setItem(this.props.address[4], `${this.props.desLat},${this.props.desLong}`)
         } catch (error) {
             console.log('Error:', error)
         }

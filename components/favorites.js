@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, Text, Button, StyleSheet } from 'react-native'
+import { View, Text, Button, StyleSheet, Linking, Alert } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
 export default class Favorites extends Component {
@@ -31,16 +31,52 @@ export default class Favorites extends Component {
     }
   }
 
+  //navigate to location with name passed from the button
+  navToLoc = async (name) => {
+    try {
+      const coords = await AsyncStorage.getItem(name)
+      Linking.canOpenURL("comgooglemaps")
+        .then((canOpen) => {
+            console.log(canOpen)
+            if (canOpen) { 
+                Linking.openURL(`comgooglemaps://?daddr=${coords}&directionsmode=driving`) 
+            } else { 
+                Linking.openURL(`http://maps.apple.com/?daddr=${coords}`) 
+            }
+        })
+    } catch(err) {
+      console.log('error', err)
+    }
+  } 
+
+  //delete the location with name passed from the button
+  removeLoc = async (name) => {
+    try {
+      await AsyncStorage.removeItem(name)
+    } catch(error) {
+      console.log('Error:', error)
+    }
+
+    Alert.alert('Location removed')
+
+  }
+
     //render each saved location by mapping
     render() {
       if (this.state.locations !== null) {
         return (
           <View style={styles.container}>
-            {this.state.locations.map((item, index) => {
-              return <View key={index} >
-                      <Text>{item}</Text>
-                        <Button title='Navigate' />
-                        <Button title='Remove' />
+            {this.state.locations.map((name, index) => {
+              return <View key={index}>
+                      <Text style={styles.text}>{name}</Text>
+                      <Button 
+                        title='Go'
+                        onPress={() => this.navToLoc(name)}
+                      />
+                      <Button 
+                        title='Delete'
+                        onPress={() => this.removeLoc(name)}
+                      />
                     </View>
             })}
           </View>
@@ -53,6 +89,9 @@ export default class Favorites extends Component {
     container: {
       flex: 1,
       justifyContent: 'center',
-      alignItems: 'center'
+      margin: '10%'
+    },
+    text: {
+      textAlign: 'left'
     }
  })
