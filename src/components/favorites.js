@@ -56,14 +56,12 @@ class Favorites extends Component {
     } catch(error) {
       console.log('Error:', error)
     }
-
     Alert.alert('Location removed')
-
   }
 
     //render each saved location by mapping
     render() {
-      if (this.state.locations !== undefined) {
+      if (this.state.locations[0] !== undefined) {
         return (
           <View style={styles.container}>
             <ScrollView>

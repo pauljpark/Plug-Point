@@ -25,9 +25,7 @@ class CustomOverlayView extends Component {
         } catch (error) {
             console.log('Error:', error)
         }
-
         Alert.alert('Saved to Favorites!')
-
     }
 
     render() {
