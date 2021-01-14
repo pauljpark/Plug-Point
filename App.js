@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
 import { NavigationContainer } from '@react-navigation/native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-import Map from './components/map'
-import Favorites from './components/favorites'
-import Home from './components/home'
+import Map from './src/components/map'
+import Favorites from './src/components/favorites'
+import Home from './src/components/home'
 import { View, Text } from 'react-native'
 
 export default class App extends Component {
@@ -43,5 +43,4 @@ export default class App extends Component {
       </NavigationContainer>
     )
   } 
-
 }

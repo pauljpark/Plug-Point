@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { StyleSheet, View, Text, Button, Linking, Alert } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
-export default class CustomOverlayView extends Component { 
+class CustomOverlayView extends Component { 
 
     //when user presses "Navigate", app will check for google maps first,
     //if not installed, will open with apple maps
@@ -70,6 +70,8 @@ export default class CustomOverlayView extends Component {
         )
     }
 }
+
+export default CustomOverlayView
 
 const styles = StyleSheet.create({
     clickViewText: {

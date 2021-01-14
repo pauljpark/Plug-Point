@@ -2,17 +2,17 @@ import React, { Component } from 'react'
 import { View, Text, Button, StyleSheet, Linking, Alert, ScrollView } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
-export default class Favorites extends Component {
-  constructor() {
-    super() 
-      this.state = {
-            locations: []
-      }
-  }
-
-  componentDidMount() {
-    this.getAllLocs()
-  }
+class Favorites extends Component {
+    constructor() {
+      super() 
+        this.state = {
+              locations: []
+        }
+    }
+  
+    componentDidMount() {
+      this.getAllLocs()
+    }
 
   //when component is mounted, data from asyncstorage is set to state locations
   getAllLocs = async () => {
@@ -63,13 +63,13 @@ export default class Favorites extends Component {
 
     //render each saved location by mapping
     render() {
-      if (this.state.locations !== null) {
+      if (this.state.locations !== undefined) {
         return (
           <View style={styles.container}>
             <ScrollView>
             {this.state.locations.map((name, index) => {
               return <View key={index}>
-                      <Text style={styles.text}>{name}</Text>
+                      <Text style={styles.nameText}>{name}</Text>
                         <View style={styles.fix}>
                           <Button 
                             title='Go'
@@ -85,9 +85,16 @@ export default class Favorites extends Component {
             </ScrollView>
           </View>
         )
+      } else {
+          return (
+            <View style={styles.noFavText} >
+              <Text>No Favorites Saved Yet!</Text>
+            </View>
+          )}
       }
-    }
   }
+
+export default Favorites
 
  const styles = StyleSheet.create({
     container: {
@@ -97,13 +104,16 @@ export default class Favorites extends Component {
       paddingTop: '20%',
       paddingRight: '10%'
     },
-    text: {
+    nameText: {
       textAlign: 'center'
+    },
+    noFavText: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center'
     },
     fix: {
       flexDirection: 'row',
       justifyContent: 'space-around'
     }
  })
-
- 
