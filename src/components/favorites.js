@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { View, Text, Button, StyleSheet, Linking, Alert, ScrollView } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import MapContext from '../../context'
 
 class Favorites extends Component {
     constructor() {
@@ -10,25 +11,37 @@ class Favorites extends Component {
         }
     }
   
-    componentDidMount() {
-      this.getAllLocs()
-    }
+    // componentDidMount() {
+    //   this.getAllLocs()
+    // }
 
   //when component is mounted, data from asyncstorage is set to state locations
-  getAllLocs = async () => {
-    let locs = []
-    try {
-      locs = await AsyncStorage.getAllKeys()
-      if (locs != null) {
-        this.setState({
-          locations: locs
-        })
-      } else {
-        return null
-      }
-    } catch(error) {
-      console.log('Error:', error)
-    }
+  // getAllLocs = async () => {
+  //   let locs = []
+  //   try {
+  //     locs = await AsyncStorage.getAllKeys()
+  //     if (locs != null) {
+  //       this.setState({
+  //         locations: locs
+  //       })
+  //     } else {
+  //       return null
+  //     }
+  //   } catch(error) {
+  //     console.log('Error:', error)
+  //   }
+  // }
+
+  noFavs() {
+    <MapContext.Consumer>
+      {context => {if (context.locs[0] === undefined) {
+        return (
+          <View style={styles.noFavsText} >
+            <Text>No Favorites Saved Yet!</Text>
+          </View>
+        )
+      }}}
+    </MapContext.Consumer>
   }
 
   //navigate to location with name passed from the button
@@ -50,46 +63,51 @@ class Favorites extends Component {
   } 
 
   //delete the location with name passed from the button
-  removeLoc = async (name) => {
-    try {
-      await AsyncStorage.removeItem(name)
-    } catch(error) {
-      console.log('Error:', error)
-    }
-    Alert.alert('Location removed')
-  }
+  // removeLoc = async (name) => {
+  //   try {
+  //     await AsyncStorage.removeItem(name)
+  //   } catch(error) {
+  //     console.log('Error:', error)
+  //   }
+  //   Alert.alert('Location removed')
+  // }
 
     //render each saved location by mapping
     render() {
-      if (this.state.locations[0] !== undefined) {
-        return (
-          <View style={styles.container}>
-            <ScrollView>
-            {this.state.locations.map((name, index) => {
-              return <View key={index}>
-                      <Text style={styles.nameText}>{name}</Text>
-                        <View style={styles.fix}>
-                          <Button 
-                            title='Go'
-                            onPress={() => this.navToLoc(name)}
-                          />
-                          <Button 
-                            title='Delete'
-                            onPress={() => this.removeLoc(name)}
-                          />
-                        </View>
+      return (
+          <MapContext.Consumer>{context => 
+              {if (context.locs[0] !== undefined) {
+                  return (
+                      <View style={styles.container}>
+                          <ScrollView>
+                          {(context.locs.map((name, index) => {
+                              return (
+                                  <View key={index}>
+                                      <Text style={styles.nameText}>{name}</Text>
+                                          <View style={styles.fix}>
+                                              <Button 
+                                                  title='Go'
+                                                  onPress={() => this.navToLoc(name)}
+                                              />
+                                              <Button 
+                                                  title='Delete'
+                                                  onPress={(d) => context.removeLoc(name)}
+                                              />
+                                          </View>
+                                  </View>
+                              )}))}
+                          </ScrollView>
                       </View>
-            })}
-            </ScrollView>
-          </View>
-        )
-      } else {
-          return (
-            <View style={styles.noFavText} >
-              <Text>No Favorites Saved Yet!</Text>
-            </View>
-          )}
-      }
+                  )
+        } else {
+            return (
+              <View style={styles.noFavsText} >
+                  <Text>No Favorites Saved!</Text>
+              </View>
+            )}
+          }}
+        </MapContext.Consumer>
+      )}
   }
 
 export default Favorites
@@ -105,7 +123,7 @@ export default Favorites
     nameText: {
       textAlign: 'center'
     },
-    noFavText: {
+    noFavsText: {
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center'

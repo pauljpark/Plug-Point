@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { StyleSheet, View, Text, Button, Linking, Alert } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import MapContext from '../../context'
 
 class CustomOverlayView extends Component { 
 
@@ -19,14 +20,14 @@ class CustomOverlayView extends Component {
     }
 
     //saves the location to async storage
-    async saveLoc() {
-        try {
-            await AsyncStorage.setItem(this.props.address[4], `${this.props.desLat},${this.props.desLong}`)
-        } catch (error) {
-            console.log('Error:', error)
-        }
-        Alert.alert('Saved to Favorites!')
-    }
+    // async saveLoc() {
+    //     try {
+    //         await AsyncStorage.setItem(this.props.address[4], `${this.props.desLat},${this.props.desLong}`)
+    //     } catch (error) {
+    //         console.log('Error:', error)
+    //     }
+    //     Alert.alert('Saved to Favorites!')
+    // }
 
     render() {
         return (
@@ -56,10 +57,12 @@ class CustomOverlayView extends Component {
                     title='Navigate'
                     onPress={this.handlePress}
                 />
-                <Button 
-                    title='Save'
-                    onPress={() => this.saveLoc()}
-                />
+                <MapContext.Consumer>{context =>
+                    <Button 
+                        title='Save'
+                        onPress={(d) => context.saveLoc(this.props.address[4], `${this.props.desLat},${this.props.desLong}`)}
+                    />}
+                </MapContext.Consumer>
                 <Button 
                     title='Exit'
                     onPress={this.props.overlayExit}
