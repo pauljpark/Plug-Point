@@ -19,16 +19,6 @@ class CustomOverlayView extends Component {
         })
     }
 
-    //saves the location to async storage
-    // async saveLoc() {
-    //     try {
-    //         await AsyncStorage.setItem(this.props.address[4], `${this.props.desLat},${this.props.desLong}`)
-    //     } catch (error) {
-    //         console.log('Error:', error)
-    //     }
-    //     Alert.alert('Saved to Favorites!')
-    // }
-
     render() {
         return (
             <View>

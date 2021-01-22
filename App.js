@@ -4,7 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import Map from './src/components/map'
 import Favorites from './src/components/favorites'
 import Home from './src/components/home'
-import { View, Text, Alert } from 'react-native'
+import { Alert } from 'react-native'
 import MapContext from './context'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
@@ -12,7 +12,8 @@ export default class App extends Component {
   constructor() {
     super()
       this.state = {
-        locations: []
+        locations: [],
+        logoutOverlay: true
       }
   }
 
@@ -20,14 +21,6 @@ export default class App extends Component {
     this.getAllLocs()
   }
 
-  // saveLoc(d) {
-  //   Alert.alert('Location Saved!') 
-  //     let tempL = this.state.locations
-  //     this.setState({
-  //       locations: [d,...tempL]
-  //     })
-  //     console.log(tempL)
-  // }
   saveLoc = async (dest, coords) => {
         try {
             await AsyncStorage.setItem(dest, coords)
@@ -66,14 +59,6 @@ export default class App extends Component {
     }
   }
 
-  logOut() {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} >
-        <Text>Are you sure you want to log out?</Text>
-      </View>
-    )
-  }
-
   render() {
     const Tab = createBottomTabNavigator()
     return (
@@ -96,10 +81,6 @@ export default class App extends Component {
           <Tab.Screen 
             name='Favorites'
             component={Favorites}
-          />
-          <Tab.Screen 
-            name='Log Out'
-            component={this.logOut}
           />
         </Tab.Navigator>
       </NavigationContainer>

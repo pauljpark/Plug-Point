@@ -10,39 +10,6 @@ class Favorites extends Component {
               locations: []
         }
     }
-  
-    // componentDidMount() {
-    //   this.getAllLocs()
-    // }
-
-  //when component is mounted, data from asyncstorage is set to state locations
-  // getAllLocs = async () => {
-  //   let locs = []
-  //   try {
-  //     locs = await AsyncStorage.getAllKeys()
-  //     if (locs != null) {
-  //       this.setState({
-  //         locations: locs
-  //       })
-  //     } else {
-  //       return null
-  //     }
-  //   } catch(error) {
-  //     console.log('Error:', error)
-  //   }
-  // }
-
-  noFavs() {
-    <MapContext.Consumer>
-      {context => {if (context.locs[0] === undefined) {
-        return (
-          <View style={styles.noFavsText} >
-            <Text>No Favorites Saved Yet!</Text>
-          </View>
-        )
-      }}}
-    </MapContext.Consumer>
-  }
 
   //navigate to location with name passed from the button
   navToLoc = async (name) => {
@@ -60,17 +27,7 @@ class Favorites extends Component {
     } catch(err) {
       console.log('error', err)
     }
-  } 
-
-  //delete the location with name passed from the button
-  // removeLoc = async (name) => {
-  //   try {
-  //     await AsyncStorage.removeItem(name)
-  //   } catch(error) {
-  //     console.log('Error:', error)
-  //   }
-  //   Alert.alert('Location removed')
-  // }
+  }
 
     //render each saved location by mapping
     render() {
