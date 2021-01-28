@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
-import { View, Text, Button, StyleSheet, Linking, Alert, ScrollView } from 'react-native'
+import { View, Text, Button, StyleSheet, Linking, ScrollView } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import MapContext from '../../context'
+import { MaterialIcons } from '@expo/vector-icons'
 
 class Favorites extends Component {
     constructor() {
@@ -40,6 +41,7 @@ class Favorites extends Component {
                           {(context.locs.map((name, index) => {
                               return (
                                   <View key={index}>
+                                    <MaterialIcons style={styles.icon} name="ev-station" size={30} color="black" />
                                       <Text style={styles.nameText}>{name}</Text>
                                           <View style={styles.fix}>
                                               <Button 

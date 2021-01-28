@@ -49,7 +49,7 @@ export default class Map extends Component {
 
       //Charger data is fetched from API after location access is granted
       //locations are limited to 10 miles from user's location
-       fetch(`https://api.openchargemap.io/v3/poi/?key=API-KEY-HERE&output=json&countrycode=US&latitude=${this.state.myLatitude}&longitude=${this.state.myLongitude}&distance=10&compact=true&verbose=false`)
+       fetch(`https://api.openchargemap.io/v3/poi/?key=${process.env.CHARGER_KEY}&output=json&countrycode=US&latitude=${this.state.myLatitude}&longitude=${this.state.myLongitude}&distance=10&compact=true&verbose=false`)
        .then(response => response.json())
        .then((resp) => {
          this.setState({
