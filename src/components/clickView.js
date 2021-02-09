@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
-import { StyleSheet, View, Text, Button, Linking, Alert } from 'react-native'
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import { StyleSheet, View, Text, Linking } from 'react-native'
 import MapContext from '../../context'
+import { Title, Headline, Subheading, Button } from 'react-native-paper'
+import { Entypo, FontAwesome5, Ionicons } from '@expo/vector-icons'
 
 class CustomOverlayView extends Component { 
 
@@ -19,44 +20,64 @@ class CustomOverlayView extends Component {
         })
     }
 
+    handleCall = () => {
+        Linking.openURL(`tel:${this.props.address[5]}`)
+    }
+
     render() {
         return (
-            <View>
-                <Text style={styles.clickViewText}>
-                    {this.props.address[4]}
-                </Text>
-                <Text style={styles.clickViewText}>
-                    Business Hours: {this.props.address[5]}
-                </Text>
-                <Text style={styles.clickViewText}>
-                    {this.props.address[0]}
-                </Text>
-                <Text style={styles.clickViewText}>
-                    {this.props.address[1]}
-                </Text>
-                <Text style={styles.clickViewText}>
-                    {this.props.address[2]}
-                </Text>
-                <Text style={styles.clickViewText}>
-                    {this.props.address[3]}
-                </Text>
-                <Text style={styles.clickViewText}>
-                    {this.props.distance} away
-                </Text>
-                <Button 
-                    title='Navigate'
-                    onPress={this.handlePress}
-                />
-                <MapContext.Consumer>{context =>
-                    <Button 
-                        title='Save'
-                        onPress={(d) => context.saveLoc(this.props.address[4], `${this.props.desLat},${this.props.desLong}`)}
-                    />}
-                </MapContext.Consumer>
-                <Button 
-                    title='Exit'
-                    onPress={this.props.overlayExit}
-                />
+            <View style={styles.container}>
+                <View style={styles.exitButton}>
+                    <Title>Location Details</Title>
+                    <Ionicons 
+                        name="ios-close-circle" 
+                        size={27} 
+                        color="#EB6262"
+                        onPress={this.props.overlayExit}
+                        />
+                </View>
+                    <Headline style={styles.clickViewText}>
+                        {this.props.address[4]}
+                    </Headline>
+                        <Subheading style={styles.clickViewText}>
+                            <Entypo name="phone" size={17} color="gray" />  {this.props.address[5]}
+                        </Subheading>
+                        <Subheading style={styles.clickViewText}>
+                            <Entypo name="location-pin" size={17} color="gray" />  {this.props.address[0]}
+                        </Subheading>
+                        <Subheading style={styles.clickViewText}>      {this.props.address[1]}, {this.props.address[2]}
+                        </Subheading>
+                        <Subheading style={styles.clickViewText}>      {this.props.address[3]}
+                        </Subheading>
+                        <Subheading style={styles.clickViewText}>
+                            <FontAwesome5 name="car-side" size={14} color="gray" />  {this.props.distance}les
+                        </Subheading>
+                        <View><Text></Text></View>
+                <View style={styles.buttonContainer}>
+                    <Button
+                        mode='contained'
+                        color='#19996f'
+                        onPress={this.handleCall}
+                    >
+                        CALL
+                    </Button>
+                    <Button
+                        mode='contained'
+                        color='#19996f'
+                        onPress={this.handlePress}
+                    >
+                        NAVIGATE
+                    </Button>
+                    <MapContext.Consumer>{context =>
+                        <Button
+                            mode='contained'
+                            color='#19996f'
+                            onPress={(d) => context.saveLoc(this.props.address[4], `${this.props.desLat},${this.props.desLong}`)}
+                        >
+                            SAVE
+                        </Button>}
+                    </MapContext.Consumer>
+                </View>
             </View>
         )
     }
@@ -65,13 +86,27 @@ class CustomOverlayView extends Component {
 export default CustomOverlayView
 
 const styles = StyleSheet.create({
+    container: {
+        width: 300,
+        padding: 10
+    },
     clickViewText: {
-        color: 'red'
+        color: 'gray'
     },
     centeredView: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
         marginTop: 22
+      },
+      buttonContainer: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between'
+      },    
+      exitButton: {
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'space-between'
       }
 })

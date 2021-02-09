@@ -7,7 +7,7 @@ import Home from './src/components/home'
 import { Alert } from 'react-native'
 import MapContext from './context'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { MaterialCommunityIcons, MaterialIcons, Ionicons } from '@expo/vector-icons';
+import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 
 export default class App extends Component {
   constructor() {

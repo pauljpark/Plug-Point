@@ -1,13 +1,14 @@
 import React, { Component } from 'react'
-import MapView, { Polyline, Callout, Marker } from 'react-native-maps'
+import MapView, { Polyline, Callout, Marker, PROVIDER_GOOGLE } from 'react-native-maps'
 import { decode } from '@mapbox/polyline'
 import { getRegion } from '../helpers/map'
 import * as Location from 'expo-location'
 import * as Permissions from 'expo-permissions'
-import { Button, StyleSheet, View, Text, ActivityIndicator } from 'react-native';
-import { Entypo } from '@expo/vector-icons'
+import { StyleSheet, View, ActivityIndicator, Image } from 'react-native';
+import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons'
 import CustomOverlayView from './clickView'
 import { Overlay } from 'react-native-elements'
+import { Subheading, Caption, Paragraph, Title, Headline } from 'react-native-paper'
 
 export default class Map extends Component {
   constructor() {
@@ -33,19 +34,20 @@ export default class Map extends Component {
 
     //ask permission to use my location 
     getLocation = async () => {
-        let { status } = await Permissions.askAsync(Permissions.LOCATION);
+        let { status } = await Permissions.askAsync(Permissions.LOCATION)
     
         if (status === 'granted') {
-          let location = await Location.getCurrentPositionAsync({});
+          let location = await Location.getCurrentPositionAsync({})
     
           this.setState({
               myLatitude:location.coords.latitude,
               myLongitude:location.coords.longitude,
               spinnerVisible: false
-          });
+          })
     
-          this.map.animateToRegion(getRegion(location.coords.latitude, location.coords.longitude, 16000));
-       } else { alert('We need your permission!') }
+          this.map.animateToRegion(getRegion(this.state.myLatitude, this.state.myLongitude, 16000))
+          
+        } else { alert('We need your permission!') }
 
       //Charger data is fetched from API after location access is granted
       //locations are limited to 10 miles from user's location
@@ -64,6 +66,11 @@ export default class Map extends Component {
     //when marker is pressed, the state of initial polycoords is updated
     //current pressed marker's info is also updated
     onPressMarker = (marker) => () => {
+      this.map.animateCamera({ 
+        center: {
+          latitude: marker.AddressInfo.Latitude, 
+          longitude: marker.AddressInfo.Longitude 
+        }})
       this.setState({
         desLatitude: marker.AddressInfo.Latitude,
         desLongitude: marker.AddressInfo.Longitude,
@@ -111,7 +118,7 @@ export default class Map extends Component {
         })
         this.setState({
             coords: coords,
-          distance: distance
+            distance: distance
         })
       } catch (error) {
         console.log('Error: ', error)
@@ -135,14 +142,22 @@ export default class Map extends Component {
                         }} 
             onPress={this.onPressMarker(marker)}
         >
-          <Callout>
-            <View>
-              <Text>{marker.AddressInfo.Title}</Text>
-              <Text>Distance: {this.state.distance}</Text>
-              <Button 
-                  title='Click For Details'
-                  onPress={() => onPressDetails()}
-              />
+          <Image 
+              source={require('../../public/e-bike-charging.png')}
+          />
+          {//callout button doesn't work when using custom google maps, 
+          //temp solution for callout onPress...
+                      }
+          <Callout 
+              style={styles.callout}
+              onPress={() => onPressDetails()}>
+            <View style={styles.calloutStyle}>
+              <Subheading style={{ textAlign: 'center' }}>{marker.AddressInfo.Title}</Subheading>
+                <View style={{display:'flex', flexDirection: 'row'}}>
+                  <MaterialCommunityIcons name='car-hatchback' size={24} />
+                  <Paragraph>  {this.state.distance}</Paragraph>
+                </View>
+              <Caption>Tap for Details</Caption>
             </View>
           </Callout>
         </Marker>
@@ -157,34 +172,44 @@ export default class Map extends Component {
 
     //will animate back to user's location when pressed
     animateBack = () => {
-      this.map.animateToRegion(getRegion(this.state.myLatitude, this.state.myLongitude, 16000));
+      this.map.animateToRegion(getRegion(this.state.myLatitude, this.state.myLongitude, 16000))
+      // this.map.animateCamera({ 
+      //   center: {
+      //     latitude: this.state.myLatitude, 
+      //     longitude: this.state.myLongitude 
+      //   }})
     }
 
     render() {
-      if (this.state.spinnerVisible == true) {
         return (
-            <View style={styles.spinner}>
-                  <Text style={styles.text}>Please wait...</Text>
+          //passing address and distance to CustomOverlayView so we can use them
+                <>
+                <View style={styles.spinner}>
+                  <Headline style={styles.text}>Finding chargers near you...</Headline>
                   <ActivityIndicator 
                         size='large' 
                         color='#000000' 
                         animating={this.state.spinnerVisible}
                   />
-            </View>
-        )
-      } else {
-        return (
-          //passing address and distance to CustomOverlayView so we can use them
-                <>
+                </View>
                 <MapView 
-                    showsUserLocation
+                    showsUserLocation={this.state.spinnerVisible ? false : true}
                     ref={(ref) => this.map = ref}
                     style={this.state.spinnerVisible ? styles.mapLoad : styles.map}
-                    initialRegion={getRegion(39.9526, -75.1652, 160000)}
+                    initialRegion={getRegion(37.0902, -95.7129, 1600000)}
+                    customMapStyle={mapStyle}
+                    provider={PROVIDER_GOOGLE}
+                    rotateEnabled={false}
+                    onMapReady={this.getLocation}
+                    zoomEnabled={this.state.spinnerVisible ? false : true}
+                    scrollEnabled={this.state.spinnerVisible ? false : true}
+                    minZoomLevel={5}
                 >
                   {this.mapMarkers()}
                   <Polyline 
                     coordinates={this.state.coords}
+                    strokeWidth={4}
+                    strokeColors={['#3394fd', '#19996f']}
                   />
                 </MapView>
                     <View>
@@ -201,18 +226,18 @@ export default class Map extends Component {
                         />
                       </Overlay>
                     </View>
-                    <View style={styles.button}>
-                      <Entypo 
-                        name="direction" 
+                    <View style={this.state.spinnerVisible ? {display: 'none'} : styles.button}>
+                      <MaterialIcons 
+                        name="center-focus-strong" 
                         size={40} 
-                        color="black"
+                        color="#3394fd"
                         onPress={this.animateBack}
                       />
                     </View>
                 </>
             )}
         }
-    }
+    
 
 const styles = StyleSheet.create({
     mapLoad: {
@@ -224,17 +249,217 @@ const styles = StyleSheet.create({
     },
     button: {
       position: 'absolute',
-      top: '7%',
-      right: '7%',
+      top: '9%',
+      right: '9%',
       alignSelf: 'flex-end'
     },
     spinner: {
       position: 'absolute',
       flex: 1,
       alignSelf: 'center',
-      marginTop: '100%'
+      marginTop: '95%'
     },
     text: {
-      bottom: '5%'
+      bottom: '10%'
+    },
+    callout: {
+      flex: 1, 
+      position: 'relative',
+      width: 150
+    },
+    calloutStyle: {
+        alignItems: 'center',
+        marginTop: -6, 
+        marginRight: -11, 
+        marginBottom: -4, 
+        marginLeft: -7, 
+        padding: 10
     }
 });
+
+var mapStyle = [
+  {
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#212121"
+      }
+    ]
+  },
+  {
+    "elementType": "labels.icon",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#757575"
+      }
+    ]
+  },
+  {
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "color": "#212121"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#757575"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.country",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#9e9e9e"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.land_parcel",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.locality",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#bdbdbd"
+      }
+    ]
+  },
+  {
+    "featureType": "poi",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#757575"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.park",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#181818"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.park",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#616161"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.park",
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "color": "#1b1b1b"
+      }
+    ]
+  },
+  {
+    "featureType": "road",
+    "elementType": "geometry.fill",
+    "stylers": [
+      {
+        "color": "#2c2c2c"
+      }
+    ]
+  },
+  {
+    "featureType": "road",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#8a8a8a"
+      }
+    ]
+  },
+  {
+    "featureType": "road.arterial",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#373737"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#3c3c3c"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway.controlled_access",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#4e4e4e"
+      }
+    ]
+  },
+  {
+    "featureType": "road.local",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#616161"
+      }
+    ]
+  },
+  {
+    "featureType": "transit",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#757575"
+      }
+    ]
+  },
+  {
+    "featureType": "water",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#000000"
+      }
+    ]
+  },
+  {
+    "featureType": "water",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#3d3d3d"
+      }
+    ]
+  }
+]
