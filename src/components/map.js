@@ -8,7 +8,7 @@ import { StyleSheet, View, ActivityIndicator, Image } from 'react-native';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons'
 import CustomOverlayView from './clickView'
 import { Overlay } from 'react-native-elements'
-import { Subheading, Caption, Paragraph, Title, Headline } from 'react-native-paper'
+import { Subheading, Caption, Paragraph, Headline } from 'react-native-paper'
 
 export default class Map extends Component {
   constructor() {
