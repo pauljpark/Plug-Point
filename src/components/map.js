@@ -23,7 +23,8 @@ export default class Map extends Component {
         distance:'',
         visible: false,
         spinnerVisible: true,
-        chargerInfo: []
+        chargerInfo: [],
+        permissionLoc: true
     } 
   }
 
@@ -44,23 +45,25 @@ export default class Map extends Component {
               myLongitude:location.coords.longitude,
               spinnerVisible: false
           })
-    
-          this.map.animateToRegion(getRegion(this.state.myLatitude, this.state.myLongitude, 16000))
-          
-        } else { alert('We need your permission!') }
+              
+          //Charger data is fetched from API after location access is granted
+          //locations are limited to 10 miles from user's location
+          fetch(`https://api.openchargemap.io/v3/poi/?key=${process.env.CHARGER_KEY}&output=json&countrycode=US&latitude=${this.state.myLatitude}&longitude=${this.state.myLongitude}&distance=10&compact=true&verbose=false`)
+          .then(response => response.json())
+          .then((resp) => {
+              this.setState({
+                data: resp
+              })
+            })
+            .catch((error) => {
+              console.log('Error', error)
+            })
 
-      //Charger data is fetched from API after location access is granted
-      //locations are limited to 10 miles from user's location
-       fetch(`https://api.openchargemap.io/v3/poi/?key=${process.env.CHARGER_KEY}&output=json&countrycode=US&latitude=${this.state.myLatitude}&longitude=${this.state.myLongitude}&distance=10&compact=true&verbose=false`)
-       .then(response => response.json())
-       .then((resp) => {
-         this.setState({
-           data: resp
-         })
-       })
-       .catch((error) => {
-         console.log('Error', error)
-       })
+          this.map.animateToRegion(getRegion(this.state.myLatitude, this.state.myLongitude, 16000))
+
+        } else { 
+            this.setState({ permissionLoc: false })
+        }
     }
     
     //when marker is pressed, the state of initial polycoords is updated
@@ -185,10 +188,14 @@ export default class Map extends Component {
           //passing address and distance to CustomOverlayView so we can use them
                 <>
                 <View style={styles.spinner}>
-                  <Headline style={styles.text}>Finding chargers near you...</Headline>
+                  <Headline style={styles.text}>{
+                        this.state.permissionLoc ? 
+                          "Finding chargers near you..." : 
+                          "Permission to access location was denied!"}
+                  </Headline>
                   <ActivityIndicator 
                         size='large' 
-                        color='#000000' 
+                        color={this.state.permissionLoc ? '#000000' : '#ffffff00'} 
                         animating={this.state.spinnerVisible}
                   />
                 </View>
@@ -260,7 +267,10 @@ const styles = StyleSheet.create({
       marginTop: '95%'
     },
     text: {
-      bottom: '10%'
+      bottom: '10%',
+      textAlign: 'center',
+      paddingLeft: 70,
+      paddingRight: 70
     },
     callout: {
       flex: 1, 
