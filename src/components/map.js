@@ -124,7 +124,7 @@ export default class Map extends Component {
     //decode the response and set the mapped points to setState
     async fetchRoute(startingLoc, endingLoc) {
       try {
-        const resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${startingLoc}&destination=${endingLoc}&key=API-KEY-HERE`)
+        const resp = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${startingLoc}&destination=${endingLoc}&key=AIzaSyBCEagotJfdsPPkKT0K5Vuti13JxYWILjk`)
         const respJson = await resp.json()
         const points = decode(respJson.routes[0].overview_polyline.points)
         const distance = respJson.routes[0].legs[0].distance.text
