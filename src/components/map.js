@@ -9,6 +9,7 @@ import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons'
 import CustomOverlayView from './clickView'
 import { Overlay } from 'react-native-elements'
 import { Subheading, Caption, Paragraph, Headline } from 'react-native-paper'
+import { getToken } from '../api/token'
 
 export default class Map extends Component {
   constructor() {
@@ -21,14 +22,16 @@ export default class Map extends Component {
         coords: [],
         data: [],
         distance:'',
-        visible: false,
+        overlayVisible: false,
         spinnerVisible: true,
         chargerInfo: [],
-        permissionLoc: true
+        permissionLoc: true,
+        tokenError: false
     } 
   }
 
-    //when the component mounts, we get user's location and fetch API data
+    //when the component mounts, get the user's location and fetch API data
+    //depending on access granted or not
     componentDidMount() {
         this.getLocation()
     }
@@ -43,24 +46,36 @@ export default class Map extends Component {
           this.setState({
               myLatitude:location.coords.latitude,
               myLongitude:location.coords.longitude,
-              spinnerVisible: false
           })
-              
-          //Charger data is fetched from API after location access is granted
-          //locations are limited to 10 miles from user's location
-          fetch(`https://api.openchargemap.io/v3/poi/?key=${process.env.CHARGER_KEY}&output=json&countrycode=US&latitude=${this.state.myLatitude}&longitude=${this.state.myLongitude}&distance=10&compact=true&verbose=false`)
-          .then(response => response.json())
-          .then((resp) => {
+
+            const token = await getToken()
+              console.log(token)
+            //if token is not correct, display error
+            if (token !== 'successful_fake_token') {
               this.setState({
-                data: resp
+                tokenError: true,
+                spinnerVisible: true,
+                permissionLoc: false
               })
-            })
-            .catch((error) => {
-              console.log('Error', error)
-            })
+            } else {
+              //Charger data is fetched from API after location access is granted
+              //locations are limited to 10 miles from user's location
+              fetch(`https://api.openchargemap.io/v3/poi/?key=${process.env.CHARGER_KEY}&output=json&countrycode=US&latitude=${this.state.myLatitude}&longitude=${this.state.myLongitude}&distance=10&compact=true&verbose=false`)
+              .then(response => response.json())
+              .then((resp) => {
+                this.setState({
+                  spinnerVisible: false,
+                  data: resp,
+                })
+              })
+              .catch((error) => {
+                console.log('Error', error)
+              })
 
-          this.map.animateToRegion(getRegion(this.state.myLatitude, this.state.myLongitude, 16000))
+              //animate to user location
+              this.map.animateToRegion(getRegion(this.state.myLatitude, this.state.myLongitude, 16000))
 
+            }
         } else { 
             this.setState({ permissionLoc: false })
         }
@@ -133,7 +148,7 @@ export default class Map extends Component {
       //when 'Click For Details' is pressed, the Overlay becomes visible
       onPressDetails = () => {
         this.setState({
-          visible: true
+          overlayVisible: true
         })
       }
 
@@ -169,7 +184,7 @@ export default class Map extends Component {
     //simply exits the Overlay                    
     onBackDropPress = () => {
       this.setState({
-        visible: false
+        overlayVisible: false
       })
     }
 
@@ -191,7 +206,9 @@ export default class Map extends Component {
                   <Headline style={styles.text}>{
                         this.state.permissionLoc ? 
                           "Finding chargers near you..." : 
-                          "Permission to access location was denied!"}
+                        this.state.tokenError ? 
+                          "Someting went wrong..." : 
+                           "Permission to access location was denied!"}
                   </Headline>
                   <ActivityIndicator 
                         size='large' 
@@ -221,7 +238,7 @@ export default class Map extends Component {
                 </MapView>
                     <View>
                       <Overlay
-                          isVisible={this.state.visible}
+                          isVisible={this.state.overlayVisible}
                           onBackdropPress={this.onBackDropPress}
                       >
                         <CustomOverlayView 
@@ -256,18 +273,18 @@ const styles = StyleSheet.create({
     },
     button: {
       position: 'absolute',
-      top: '9%',
-      right: '9%',
+      bottom: '5%',
+      right: '8%',
       alignSelf: 'flex-end'
     },
     spinner: {
       position: 'absolute',
       flex: 1,
       alignSelf: 'center',
-      marginTop: '95%'
+      marginTop: '75%'
     },
     text: {
-      bottom: '10%',
+      bottom: '5%',
       textAlign: 'center',
       paddingLeft: 70,
       paddingRight: 70
@@ -287,6 +304,8 @@ const styles = StyleSheet.create({
     }
 });
 
+
+//mapStyle does not work when placed in external file
 var mapStyle = [
   {
     "elementType": "geometry",

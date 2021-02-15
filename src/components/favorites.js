@@ -1,10 +1,10 @@
 import React, { Component } from 'react'
 import { View, StyleSheet, Linking, ScrollView, LogBox, ImageBackground } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import MapContext from '../../context'
+import { MapContext } from '../../context'
 import { MaterialIcons, MaterialCommunityIcons, Fontisto } from '@expo/vector-icons'
 import { SwipeListView } from 'react-native-swipe-list-view'
-import { Title, Subheading } from 'react-native-paper'
+import { Title } from 'react-native-paper'
 import Background from '../../public/favorites-background.png'
 
 class Favorites extends Component {
@@ -132,7 +132,7 @@ export default Favorites
  const styles = StyleSheet.create({
     container: {
       flex: 1,
-      paddingTop: '10%',
+      paddingTop: '5%',
       justifyContent: 'center',
     },
     background: {
@@ -155,7 +155,7 @@ export default Favorites
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
-      paddingTop: 635,
+      paddingTop: 550,
       paddingRight: 25
     },
     fix: {

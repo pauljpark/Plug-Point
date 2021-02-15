@@ -1,130 +1,93 @@
-import React, { Component } from 'react'
+import React, { useState } from 'react'
+import CreateUserForm from './src/createUserForm'
+import HomeScreen from './src/homeScreen'
+import LoginScreen from './src/loginScreen'
+import TabNav from './tabMain'
 import { NavigationContainer } from '@react-navigation/native'
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-import Map from './src/components/map'
-import Favorites from './src/components/favorites'
-import Home from './src/components/home'
-import { Alert } from 'react-native'
-import MapContext from './context'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import { createStackNavigator } from '@react-navigation/stack'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
+import { LogoutContext } from './context'
+import { setToken } from './src/api/token'
+import { mockSuccess } from './src/api/mock'
 
-export default class App extends Component {
-  constructor() {
-    super()
-      this.state = {
-        locations: [],
-        logoutOverlay: true
-      }
+const Stack = createStackNavigator()
+
+export default function App() {
+
+  const [signedIn, setSignedIn] = useState(false)
+  const [signedOut, setSignedOut] = useState(false)
+  const [name, setName] = useState('')
+
+  const login = (bool) => {
+    setSignedIn(bool)
   }
 
-  componentDidMount() {
-    this.getAllLocs()
+  const logout = (bool) => {
+    setSignedOut(bool)
+    mockSuccess({ accessToken: '' })
+            .then((async (res) => {
+                await setToken(res.accessToken)
+                //brings user back to home page
+                setSignedIn(false)
+                //unmounts logging off overlay
+                setSignedOut(false)
+            })).catch(err => console.log(err))
   }
 
-  saveLoc = async (dest, coords) => {
-        try {
-            await AsyncStorage.setItem(dest, coords)
-            this.getAllLocs()
-        } catch (error) {
-            console.log('Error:', error)
-        }
-        Alert.alert('Saved to Favorites!')
-    }
-
-  removeLoc = async (dest) => {
-      try {
-        await AsyncStorage.removeItem(dest)
-        const updatedList = this.state.locations.filter((list) => list !== dest)
-        this.setState({
-          locations: updatedList
-        })
-      } catch(error) {
-        console.log('Error:', error)
-      }
-      Alert.alert('Location Removed')
-    }  
-
-  getAllLocs = async () => {
-    try {
-      locs = await AsyncStorage.getAllKeys()
-      if (locs != null) {
-        this.setState({
-          locations: locs
-        })
-      } else {
-        return null
-      }
-    } catch(error) {
-      console.log('Error:', error)
-    }
+  const nameSetter = (nameString) => {
+    setName(nameString)
   }
-
-  render() {
-    const Tab = createBottomTabNavigator()
-    return (
-      <MapContext.Provider value={{ locs: this.state.locations, 
-                                    saveLoc: this.saveLoc, 
-                                    removeLoc: this.removeLoc 
-                                  }}>
-      <NavigationContainer>
-        <Tab.Navigator
-          initialRouteName='Home'
-          screenOptions={({ route }) => ({
-            tabBarIcon: ({ focused, color, size }) => {
-              if (route.name === 'Home') {
-                return (
-                  <MaterialCommunityIcons
-                    name={
-                      focused
-                        ? 'home-variant'
-                        : 'home-variant-outline'
-                    }
-                    size={size}
-                    color={color}
-                  />
-                )
-              } else if (route.name === 'Map') {
-                return (
-                  <MaterialCommunityIcons
-                    name={focused ? 'map' : 'map-outline'}
-                    size={size}
-                    color={color}
-                  />
-                )
-              } else if (route.name === 'Favorites') {
-                return (
-                  <MaterialIcons
-                    name={focused ? 'favorite' : 'favorite-border'}
-                    size={size}
-                    color={color}
-                  />
-                )
+   
+  return (
+      <LogoutContext.Provider value={{
+                                  log: signedOut, 
+                                  start: login,
+                                  done: logout,
+                                  nameSetter: nameSetter,
+                                  userName: name
+                                    }}
+      >
+        <NavigationContainer>
+          <Stack.Navigator>
+            {signedIn ? 
+              <Stack.Screen name='Main Screen' 
+                  component={TabNav} 
+                  options={{
+                      animationEnabled: false,
+                      headerTitle: 'plugpoint',
+                      headerRight: () => <MaterialCommunityIcons 
+                                            name="logout" 
+                                            size={27} 
+                                            color="black" 
+                                            onPress={() => logout(true)} 
+                                            style={{width: 35}}
+                                          />
+                          }} 
+              />
+                  :
+              <>
+                <Stack.Screen 
+                    name='Home' 
+                    component={HomeScreen} 
+                    options={{
+                        headerShown: false, 
+                        animationEnabled: false
+                            }} 
+                />                          
+                <Stack.Screen 
+                    name='Login Screen' 
+                    component={LoginScreen} 
+                    options={{headerShown: true}} 
+                />
+                <Stack.Screen 
+                    name='User Form' 
+                    component={CreateUserForm} 
+                    options={{headerShown: true}} 
+                />
+              </>
               }
-            },
-          })}
-          tabBarOptions={{
-            activeTintColor: '#19996f',
-            inactiveTintColor: 'gray',
-            activeBackgroundColor: '#fff',
-            inactiveBackgroundColor: '#fff',
-          }}
-        >
-          <Tab.Screen 
-            name='Home'
-            component={Home}
-          />
-          <Tab.Screen 
-            name='Map'
-            component={Map}
-          />
-          <Tab.Screen 
-            name='Favorites'
-            component={Favorites}
-          />
-        </Tab.Navigator>
-      </NavigationContainer>
-      </MapContext.Provider>
-    )
-  } 
+            </Stack.Navigator>
+          </NavigationContainer>
+       </LogoutContext.Provider>
+  )
 }

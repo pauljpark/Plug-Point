@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { StyleSheet, View, Text, Linking } from 'react-native'
-import MapContext from '../../context'
+import { MapContext } from '../../context'
 import { Title, Headline, Subheading, Button } from 'react-native-paper'
 import { Entypo, FontAwesome5, Ionicons } from '@expo/vector-icons'
 
